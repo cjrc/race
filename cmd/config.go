@@ -15,6 +15,7 @@
 package cmd
 
 import (
+	"io"
 	"os"
 
 	"gopkg.in/yaml.v2"
@@ -43,9 +44,24 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		encoder := yaml.NewEncoder(os.Stdout)
-		encoder.Encode(&C)
+		C.Write(os.Stdout)
 	},
+}
+
+func (config Config) Write(writer io.Writer) error {
+	encoder := yaml.NewEncoder(writer)
+	return encoder.Encode(&C)
+}
+
+// WriteToFile saves the configuration to the specified file
+func (config Config) WriteToFile(filename string) error {
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	return config.Write(file)
 }
 
 func init() {

@@ -13,6 +13,35 @@ import (
 
 var dbConn string
 
+const createEntriesTableSQL = `
+	CREATE TABLE IF NOT EXISTS Entries (
+		id INTEGER PRIMARY KEY
+	);`
+
+const createResultsTableSQL = `
+	CREATE TABLE IF NOT EXISTS Results (
+		id INTEGER PRIMARY KEY
+		place INTEGER DEFAULT 0
+		time INTEGER DEFAULT 0
+		avg_pace INTEGER DEFAULT 0
+		distance INTEGER DEFAULT 0
+		name VARCHAR(80) DEFAULT ""
+		bib_num INTEGER UNIQUE
+		class VARCHAR(20) DEFAULT ""
+	);`
+
+const createEventsTableSQL = `
+CREATE TABLE IF NOT EXISTS Events (
+	id INTEGER PRIMARY KEY
+
+);`
+
+const createRacesTableSQL = `
+CREATE TABLE IF NOT EXISTS Races (
+	id INTEGER PRIMARY KEY
+
+);`
+
 // initCmd represents the init command
 var newCmd = &cobra.Command{
 	Use:   "new",

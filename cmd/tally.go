@@ -49,8 +49,8 @@ func watchResults(watcher *fsnotify.Watcher) {
 	for {
 		select {
 		case event := <-watcher.Events:
-			log.Println("event:", event)
 			if event.Op&fsnotify.Write == fsnotify.Write {
+				// process the results file here
 				log.Println("modified file:", event.Name)
 			}
 		case err := <-watcher.Errors:

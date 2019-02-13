@@ -13,8 +13,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var dbConn string
-
 // SQLcommands are for creating the data tables, indices, etc
 var schema = []string{
 	`CREATE TABLE Entries (
@@ -69,12 +67,13 @@ var schema = []string{
 var newCmd = &cobra.Command{
 	Use:   "new",
 	Short: "Creates a new regatta (config file, database tables, etc..)",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
+	Long: `The 'new' command will create a new regatta in the current directory.
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+Note:
+ - The current directory must be empty.  
+ - A database must be specified by either the RACE_DB environment variable or --db flag.  
+ 
+The new command will create all the necessary tables and indices in the race database.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// A New regatta will be created in the current working directory
 		pwd, err := os.Getwd()
@@ -96,10 +95,7 @@ to quickly create a Cobra application.`,
 			os.Exit(1)
 		}
 
-		// Command line flag will take precendence over env var
-		if dbConn != "" {
-			C.DB = dbConn
-		}
+		// we must know what database to use
 		if C.DB == "" {
 			fmt.Println("Must specify a database connection to create a new race.")
 			os.Exit(1)
@@ -169,7 +165,6 @@ func init() {
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
 	// initCmd.PersistentFlags().String("foo", "", "A help for foo")
-	newCmd.PersistentFlags().StringVar(&dbConn, "db", "", "Connection string for the postgres database")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:

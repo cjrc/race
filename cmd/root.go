@@ -13,6 +13,7 @@ import (
 )
 
 var cfgFile string
+var dbConn string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -45,6 +46,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./race.yaml)")
+	rootCmd.PersistentFlags().StringVar(&dbConn, "db", "", "Connection string for the postgres database")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -86,5 +88,10 @@ func initConfig() {
 	if err := viper.Unmarshal(&C); err != nil {
 		fmt.Printf("Fatal error config file: %s\n", err)
 		os.Exit(1)
+	}
+
+	// The command line flag overrides the env variable or config file
+	if dbConn != "" {
+		C.DB = dbConn
 	}
 }

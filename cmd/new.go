@@ -56,7 +56,22 @@ to quickly create a Cobra application.`,
 		// Create the new regatta
 		fmt.Println("creating default config")
 		C.WriteToFile("race.yaml")
+
+		fmt.Println("creating shared folders")
+		if err := createSharedFolders(); err != nil {
+			fmt.Printf("Can't create shared folders: %s\n", err)
+		}
 	},
+}
+
+func createSharedFolders() error {
+	if err := os.MkdirAll(C.HTMLPath, 0755); err != nil {
+		return err
+	}
+	if err := os.MkdirAll(C.RacePath, 0755); err != nil {
+		return err
+	}
+	return os.MkdirAll(C.ResultsPath, 0755)
 }
 
 func isDirEmpty(name string) (bool, error) {
@@ -81,7 +96,7 @@ func init() {
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
 	// initCmd.PersistentFlags().String("foo", "", "A help for foo")
-	newCmd.PersistentFlags().String("db", "", "Connection string for the postgres database")
+	newCmd.PersistentFlags().StringVar(&dbConn, "db", "", "Connection string for the postgres database")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:

@@ -17,6 +17,10 @@ type Config struct {
 	NLanes int // number of ergs per bank
 
 	DB string `mapstructure:"DB"`
+
+	HTMLPath    string
+	RacePath    string
+	ResultsPath string
 }
 
 // C contains global configuration

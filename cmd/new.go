@@ -63,6 +63,8 @@ var schema = []string{
 	);`,
 }
 
+var noCreateTables bool
+
 // initCmd represents the init command
 var newCmd = &cobra.Command{
 	Use:   "new",
@@ -95,18 +97,20 @@ The new command will create all the necessary tables and indices in the race dat
 			os.Exit(1)
 		}
 
-		// we must know what database to use
-		if C.DB == "" {
-			fmt.Println("Must specify a database connection to create a new race.")
-			os.Exit(1)
-		}
+		// if user specifies not to create tables, we don't mess with the database at all
+		if !noCreateTables {
+			// we must know what database to use
+			if C.DB == "" {
+				fmt.Println("Must specify a database connection to create a new race.")
+				os.Exit(1)
+			}
 
-		fmt.Println("creating database schema")
-		if err := createDatabase(); err != nil {
-			fmt.Println("Cannot create database tables:", err)
-			os.Exit(1)
+			fmt.Println("creating database schema")
+			if err := createDatabase(); err != nil {
+				fmt.Println("Cannot create database tables:", err)
+				os.Exit(1)
+			}
 		}
-
 		// Create the new regatta
 		fmt.Println("creating default config")
 		C.WriteToFile("race.yaml")
@@ -169,4 +173,5 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// initCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	newCmd.Flags().BoolVar(&noCreateTables, "no-create-tables", false, "Don't create Database tables for a new race")
 }

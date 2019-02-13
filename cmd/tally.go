@@ -5,9 +5,14 @@ package cmd
 
 import (
 	"fmt"
+	"log"
+	"os"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
 )
+
+var doneCh chan bool
 
 // tallyCmd represents the tally command
 var tallyCmd = &cobra.Command{
@@ -20,8 +25,39 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("tally called")
+		watcher, err := fsnotify.NewWatcher()
+		if err != nil {
+			fmt.Println("Cannot create watcher:", err)
+			os.Exit(1)
+		}
+		defer watcher.Close()
+
+		doneCh = make(chan bool)
+		go watchResults(watcher)
+
+		err = watcher.Add(C.ResultsPath)
+		if err != nil {
+			fmt.Println("Cannot watch results:", err)
+			os.Exit(1)
+		}
+
+		<-doneCh
 	},
+}
+
+func watchResults(watcher *fsnotify.Watcher) {
+	for {
+		select {
+		case event := <-watcher.Events:
+			log.Println("event:", event)
+			if event.Op&fsnotify.Write == fsnotify.Write {
+				log.Println("modified file:", event.Name)
+			}
+		case err := <-watcher.Errors:
+			fmt.Println("Error watching:", err)
+			doneCh <- true
+		}
+	}
 }
 
 func init() {

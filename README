@@ -1,0 +1,8 @@
+race config -- dump config file
+race new    -- create a new regatta in pwd
+race import -- import entries
+race publish schedule -- create the HTML schedule
+race publish races -- create the .RAC file
+race publish results -- create the HTML results
+race schedule -- generate a schedule to cover all events/entries
+race tally -- watch for new race results and send them to the database

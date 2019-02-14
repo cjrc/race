@@ -13,11 +13,12 @@ import (
 )
 
 var doneCh chan bool
+var liveResults bool
 
 // tallyCmd represents the tally command
-var tallyCmd = &cobra.Command{
-	Use:   "tally",
-	Short: "Watch the results path and tally results as they arrive",
+var resultsCmd = &cobra.Command{
+	Use:   "results",
+	Short: "Import the race results for each event",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
 
@@ -61,7 +62,7 @@ func watchResults(watcher *fsnotify.Watcher) {
 }
 
 func init() {
-	rootCmd.AddCommand(tallyCmd)
+	importCmd.AddCommand(resultsCmd)
 
 	// Here you will define your flags and configuration settings.
 
@@ -72,4 +73,6 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// tallyCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	resultsCmd.Flags().BoolVar(&liveResults, "live", false, "Watch the results path and tally events as new results arrive")
+
 }

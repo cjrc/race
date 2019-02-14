@@ -65,8 +65,156 @@ var schema = []string{
 	);`,
 }
 
-var resultsTemplate = ""
-var scheduleTemplate = ""
+var resultsTemplate = `
+<html>
+    <head>
+        <title>
+            2019 Cincinnati Indoor Rowing Championship Results
+        </title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    </head>
+
+    <body>
+
+        <div class="w3-container">
+            <h2>2019 Cincinnati Indoor Rowing Championship</h2>
+        </div>
+
+        <div class="w3-row">
+        {{ $i := 0}}
+        {{ $cnt := 0 }}
+        {{ range .Events }}
+            {{ if .Entries }}
+            <div class="w3-container w3-mobile w3-col s12 m6 l6 w3-margin-bottom w3-margin-top">
+                <div class="w3-container w3-blue w3-round" id="event{{.ID}}">
+                    <div class="w3-row">
+                    <div class="w3-left w3-cell">Event {{ .ID }}</div>
+                    <div class="w3-right w3-cell">{{ .Name }}</div>
+                    </div><div class="w3-row">
+                    <div class="w3-cell w3-left">{{ .Start }}</div>
+                    <div class="w3-right w3-cell">{{ official . }} </div>                   
+                    </div>
+                </div>
+                <div class="w3-row">
+                        <div class="w3-col  w3-center s2"><b>Place</b></div>
+                        <div class="w3-col w3-center s2"><b>Team</b></div>
+                        <div class="w3-col  s6"><b>Name</b></div>
+                        <div class="w3-col  s2 w3-center"><b>Time</b></div>
+                </div>
+                {{ range $place,$entry := .Entries }}
+                    <div class="w3-row" id="{{$entry.ID}}">
+                        <div class="w3-col  w3-center s2">{{ place $entry }}</div>
+                        <div class="w3-col w3-center s2"> {{ $entry.ClubAbbrev }} </div>
+                        <div class="w3-col  s6"> {{ $entry.BoatName }} {{ltwt $entry}}</div>
+                        <div class="w3-col  s2 w3-center">{{ $entry.Time }}</div>    
+                    </div>
+                {{ end }}
+            </div>
+            {{$i = inc $i}}
+            {{$cnt = inc $cnt }}
+                {{ if needBreak $i }}
+                    <div class="w3-cell w3-col s12 m12 l12"></div>
+                {{ end }}
+            {{ end }}
+        {{ end }}
+        </div>
+
+    <div class="w3-col s12 w3-cell w3-center">Last updated on {{ now }}.</div>
+
+    </body>
+</html>
+`
+var scheduleTemplate = `
+<html>
+    <head>
+        <title>
+            2019 Cincinnati Indoor Rowing Championship Schedule
+        </title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+        <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+    </head>
+
+    <body>
+
+        <div class="w3-container">
+            <h2>2019 Cincinnati Indoor Rowing Championship</h2>
+        </div>
+
+        <div class="w3-cell-row">
+        {{ $i := 0}}
+        {{ $cnt := 0 }}
+        {{ range .Races }}
+            {{ if .Entries }}
+                <div class="w3-cell w3-container w3-half w3-margin-bottom w3-margin-top">
+                    <div class="w3-container w3-blue w3-round race" id="race{{.ID}}">
+                        <div class="w3-row">
+                        <div class="w3-left w3-cell">{{ .Start }}</div>
+                        <div class="w3-right w3-cell">{{ .Name }}</div>
+                        </div><div class="w3-row">
+                        <div class="w3-cell w3-left">Race {{ .ID }}, Bank '{{ .Bank }}'</div>
+                        <div class="w3-right w3-cell">{{ .Distance }} meters </div>                   
+                        </div>
+                    </div>
+                    <div class="w3-cell-row">
+                            <div class="w3-col  w3-center s2"><b>Lane</b></div>
+                            <div class="w3-col w3-center s2"><b>Bow</b></div>
+                            <div class="w3-col  s6"><b>Name</b></div>
+                            <div class="w3-col  s2 w3-center"><b>Team</b></div>
+                    </div>
+                    {{ range .Entries }}
+                        {{ $cnt = inc $cnt }}
+                        <div class="w3-cell-row entry" id="{{.ID}}">
+                            <div class="w3-col  w3-center s2">{{ .Lane }}</div>
+                            <div class="w3-col w3-center s2">{{.ID}}</div>
+                            <div class="w3-col   s6">{{ .BoatName }} {{ltwt .}}</div>
+                            <div class="w3-col   s2 w3-center">{{ .ClubAbbrev }}</div>
+                        </div>
+                    {{ end }}
+                </div>
+                {{$i = inc $i}}
+                {{ if needBreak $i }}
+                    <div class="w3-cell w3-col s12 m12 l12"></div>
+                {{ end }}
+            {{ end }}
+        {{ end }}
+        </div>
+
+        <div class="w3-col s12 w3-cell w3-center">{{ $cnt }} boats scheduled.  Last updated on {{ now }}.</div>
+
+        <script>
+            var hilightColor = "w3-green"
+            
+            function getHash() {
+                return window.location.hash
+            }
+
+            function showHash() {
+                $('.race').removeClass(hilightColor)
+                $('.entry').removeClass(hilightColor)
+
+                var id = getHash()
+
+                if(id) {
+                    $(id).addClass(hilightColor)
+                }
+            }
+
+            $(function () {
+                showHash()
+
+                $(window).on('hashchange', function (e) {
+                    showHash()
+                });
+
+            })
+        </script>
+
+    </body>
+</html>
+`
 
 var noCreateTables bool
 

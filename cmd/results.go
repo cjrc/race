@@ -38,8 +38,31 @@ to quickly create a Cobra application.`,
 }
 
 func addResultsToDatabase(results []erg.Result) error {
-	// TODO: add sql code here
+	sql := `INSERT INTO Results(place, time, avg_pace, distance, name, bib_num, class) 
+			VALUES(:place, :time, :avg_pace, :distance, :name. :bib_num, :class)
+			ON CONFLICT (bib_num)
+			DO NOTHING;`
+
+	db := DBMustConnect()
+
+	for _, result := range results {
+		fmt.Printf("Adding results for %s (bib # %d)..", result.Name, result.BibNum)
+		result, err := db.NamedExec(sql, &result)
+		if err != nil {
+			return err
+		}
+		num, _ := result.RowsAffected()
+		if num == 0 {
+			fmt.Println(" duplicate results, ignored.")
+		} else if num == 1 {
+			fmt.Println(" done.")
+		} else {
+			fmt.Println(" something stranged happened!")
+		}
+	}
+
 	return nil
+
 }
 
 func importResults() error {
@@ -49,6 +72,7 @@ func importResults() error {
 	}
 
 	for _, filename := range filenames {
+		fmt.Println("Reading results from", filename)
 		results, err := erg.ReadResultsFromFile(filename)
 		if err != nil {
 			return err
@@ -66,6 +90,7 @@ func watchResults(watcher *fsnotify.Watcher) {
 		select {
 		case event := <-watcher.Events:
 			if event.Op&fsnotify.Write == fsnotify.Write {
+				fmt.Println("Reading results from", event.Name)
 				results, err := erg.ReadResultsFromFile(event.Name)
 				if err != nil {
 					fmt.Println("Error reading results:", err)

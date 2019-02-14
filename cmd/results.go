@@ -5,9 +5,10 @@ package cmd
 
 import (
 	"fmt"
-	"log"
 	"os"
+	"path/filepath"
 
+	"github.com/cjrc/erg"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
 )
@@ -26,24 +27,38 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		watcher, err := fsnotify.NewWatcher()
-		if err != nil {
-			fmt.Println("Cannot create watcher:", err)
+		if err := importResults(); err != nil {
+			fmt.Println("Error importing results:", err)
 			os.Exit(1)
 		}
-		defer watcher.Close()
-
-		doneCh = make(chan bool)
-		go watchResults(watcher)
-
-		err = watcher.Add(C.ResultsPath)
-		if err != nil {
-			fmt.Println("Cannot watch results:", err)
-			os.Exit(1)
+		if liveResults {
+			importLiveResults()
 		}
-
-		<-doneCh
 	},
+}
+
+func addResultsToDatabase(results []erg.Result) error {
+	// TODO: add sql code here
+	return nil
+}
+
+func importResults() error {
+	filenames, err := filepath.Glob(filepath.Join(C.ResultsPath, "*.txt"))
+	if err != nil {
+		return err
+	}
+
+	for _, filename := range filenames {
+		results, err := erg.ReadResultsFromFile(filename)
+		if err != nil {
+			return err
+		}
+		if err := addResultsToDatabase(results); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func watchResults(watcher *fsnotify.Watcher) {
@@ -51,8 +66,15 @@ func watchResults(watcher *fsnotify.Watcher) {
 		select {
 		case event := <-watcher.Events:
 			if event.Op&fsnotify.Write == fsnotify.Write {
-				// process the results file here
-				log.Println("modified file:", event.Name)
+				results, err := erg.ReadResultsFromFile(event.Name)
+				if err != nil {
+					fmt.Println("Error reading results:", err)
+					doneCh <- true
+				}
+				if err := addResultsToDatabase(results); err != nil {
+					fmt.Println("Error saving results:", err)
+					doneCh <- true
+				}
 			}
 		case err := <-watcher.Errors:
 			fmt.Println("Error watching:", err)
@@ -61,18 +83,29 @@ func watchResults(watcher *fsnotify.Watcher) {
 	}
 }
 
+func importLiveResults() {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		fmt.Println("Cannot create watcher:", err)
+		os.Exit(1)
+	}
+	defer watcher.Close()
+
+	doneCh = make(chan bool)
+	go watchResults(watcher)
+
+	err = watcher.Add(C.ResultsPath)
+	if err != nil {
+		fmt.Println("Cannot watch results:", err)
+		os.Exit(1)
+	}
+
+	<-doneCh
+}
+
 func init() {
 	importCmd.AddCommand(resultsCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// tallyCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// tallyCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	resultsCmd.Flags().BoolVar(&liveResults, "live", false, "Watch the results path and tally events as new results arrive")
 
 }

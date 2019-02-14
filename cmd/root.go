@@ -89,6 +89,7 @@ func initConfig() {
 	viper.SetDefault("HTMLPath", "shared/html")
 	viper.SetDefault("RacePath", "shared/races")
 	viper.SetDefault("ResultsPath", "shared/results")
+	viper.SetDefault("TemplatePath", "templates")
 	viper.SetEnvPrefix("RACE")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 

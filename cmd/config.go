@@ -18,9 +18,10 @@ type Config struct {
 
 	DB string `mapstructure:"DB"`
 
-	HTMLPath    string
-	RacePath    string
-	ResultsPath string
+	HTMLPath     string
+	RacePath     string
+	ResultsPath  string
+	TemplatePath string
 }
 
 // C contains global configuration

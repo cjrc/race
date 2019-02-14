@@ -6,7 +6,9 @@ package cmd
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	_ "github.com/lib/pq" // database driver for Postgres
 	"github.com/spf13/cobra"
@@ -63,6 +65,9 @@ var schema = []string{
 	);`,
 }
 
+var resultsTemplate = ""
+var scheduleTemplate = ""
+
 var noCreateTables bool
 
 // initCmd represents the init command
@@ -116,13 +121,33 @@ The new command will create all the necessary tables and indices in the race dat
 		C.WriteToFile("race.yaml")
 
 		fmt.Println("creating shared folders")
-		if err := createSharedFolders(); err != nil {
-			fmt.Printf("Can't create shared folders: %s\n", err)
+		if err := createFolders(); err != nil {
+			fmt.Printf("Can't create race folders: %s\n", err)
+		}
+
+		fmt.Println("creating html templates")
+		if err := createTemplates(); err != nil {
+			fmt.Println("Can't create html templates:", err)
 		}
 	},
 }
 
-func createSharedFolders() error {
+func createTemplates() error {
+	resultsFilename := filepath.Join(C.TemplatePath, "results.html")
+	scheduleFilename := filepath.Join(C.TemplatePath, "schedule.html")
+
+	if err := ioutil.WriteFile(resultsFilename, []byte(resultsTemplate), 0644); err != nil {
+		return err
+	}
+
+	return ioutil.WriteFile(scheduleFilename, []byte(scheduleTemplate), 0644)
+}
+
+func createFolders() error {
+	if err := os.MkdirAll(C.TemplatePath, 0755); err != nil {
+		return err
+	}
+
 	if err := os.MkdirAll(C.HTMLPath, 0755); err != nil {
 		return err
 	}

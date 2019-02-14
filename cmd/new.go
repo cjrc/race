@@ -8,7 +8,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // database driver for Postgres
 	"github.com/spf13/cobra"
 )
@@ -28,7 +27,8 @@ var schema = []string{
 		race_id INTEGER DEFAULT 0,
 		lane INTEGER DEFAULT 0,
 		scratched BOOLEAN DEFAULT false,
-		ltwt BOOLEAN DEFAULT false
+		ltwt BOOLEAN DEFAULT false,
+		bib_num INTEGER UNIQUE
 	);`,
 	"CREATE INDEX ON Entries (race_id);",
 	"CREATE INDEX ON Entries (event_id);",
@@ -39,7 +39,7 @@ var schema = []string{
 		avg_pace INTEGER DEFAULT 0,
 		distance INTEGER DEFAULT 0,
 		name text DEFAULT ''::text,
-		entry_id INTEGER UNIQUE,
+		bib_num INTEGER UNIQUE,
 		class VARCHAR(20) DEFAULT ''::text
 	);`,
 	"CREATE INDEX ON Results (entry_id);",
@@ -147,10 +147,7 @@ func isDirEmpty(name string) (bool, error) {
 }
 
 func createDatabase() error {
-	db, err := sqlx.Connect("postgres", C.DB)
-	if err != nil {
-		return err
-	}
+	db := DBMustConnect()
 
 	for _, s := range schema {
 		if _, err := db.Exec(s); err != nil {

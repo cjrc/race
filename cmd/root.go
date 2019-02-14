@@ -8,12 +8,13 @@ import (
 	"os"
 	"strings"
 
+	"github.com/jmoiron/sqlx"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var cfgFile string
-var dbConn string
+var dbString string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -39,6 +40,17 @@ func Execute() {
 	}
 }
 
+// DBMustConnect returns a connection to the database.
+// On any error, it prints error and exits the program
+func DBMustConnect() *sqlx.DB {
+	db, err := sqlx.Connect("postgres", C.DB)
+	if err != nil {
+		fmt.Println("Cannot connect to database:", err)
+		os.Exit(1)
+	}
+	return db
+}
+
 func init() {
 	cobra.OnInitialize(initConfig)
 
@@ -46,7 +58,7 @@ func init() {
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is ./race.yaml)")
-	rootCmd.PersistentFlags().StringVar(&dbConn, "db", "", "Connection string for the postgres database")
+	rootCmd.PersistentFlags().StringVar(&dbString, "db", "", "Connection string for the postgres database")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -91,7 +103,7 @@ func initConfig() {
 	}
 
 	// The command line flag overrides the env variable or config file
-	if dbConn != "" {
-		C.DB = dbConn
+	if dbString != "" {
+		C.DB = dbString
 	}
 }

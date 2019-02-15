@@ -1,3 +1,4 @@
+race check database     -- check connection to database
 race config             -- dump config file
 race new                -- create a new regatta in pwd
 race import entries     -- import entries

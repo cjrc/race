@@ -39,13 +39,14 @@ to quickly create a Cobra application.`,
 
 func addResultsToDatabase(results []erg.Result) error {
 	sql := `INSERT INTO Results(place, time, avg_pace, distance, name, bib_num, class) 
-			VALUES(:place, :time, :avg_pace, :distance, :name. :bib_num, :class)
+			VALUES(:place, :time, :avg_pace, :distance, :name, :bib_num, :class)
 			ON CONFLICT (bib_num)
 			DO NOTHING;`
 
 	db := DBMustConnect()
 
 	for _, result := range results {
+		fmt.Println(result)
 		fmt.Printf("Adding results for %s (bib # %d)..", result.Name, result.BibNum)
 		result, err := db.NamedExec(sql, &result)
 		if err != nil {

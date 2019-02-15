@@ -22,6 +22,31 @@ type Config struct {
 	RacePath     string
 	ResultsPath  string
 	TemplatePath string
+
+	EntryCols struct { // Column numbers for the RegattaCentral generic boats.xls file
+		EventID, BoatID, Age, Email, ClubName, ClubAbbrev, Seed, BoatName, Country int
+	}
+
+	MaxEntries int // Maximum number of lines that will be read from entries.xls
+}
+
+// ConfigDefaults are passed to Viper to set the default config values
+var ConfigDefaults = map[string]interface{}{
+	"DB":                   "",
+	"HTMLPath":             "shared/html",
+	"RacePath":             "shared/races",
+	"ResultsPath":          "shared/results",
+	"TemplatePath":         "templates",
+	"EntryCols.EventID":    0,
+	"EntryCols.BoatID":     10,
+	"EntryCols.Age":        12,
+	"EntryCols.Email":      5,
+	"EntryCols.ClubName":   8,
+	"EntryCols.ClubAbbrev": 9,
+	"EntryCols.Seed":       11,
+	"EntryCols.BoatName":   14,
+	"EntryCols.Country":    24,
+	"MaxEntries":           2000,
 }
 
 // C contains global configuration

@@ -46,7 +46,10 @@ func addResultsToDatabase(results []erg.Result) error {
 	db := DBMustConnect()
 
 	for _, result := range results {
-		fmt.Println(result)
+		// ignore empty results
+		if result.BibNum == 0 {
+			continue
+		}
 		fmt.Printf("Adding results for %s (bib # %d)..", result.Name, result.BibNum)
 		result, err := db.NamedExec(sql, &result)
 		if err != nil {
@@ -88,6 +91,7 @@ func importResults() error {
 
 func watchResults(watcher *fsnotify.Watcher) {
 	for {
+		fmt.Println("\nWaiting for live results..")
 		select {
 		case event := <-watcher.Events:
 			if event.Op&fsnotify.Write == fsnotify.Write {

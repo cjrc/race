@@ -40,10 +40,15 @@ func Execute() {
 	}
 }
 
+// DBConnect connects to the application specified database
+func DBConnect() (*sqlx.DB, error) {
+	return sqlx.Connect("postgres", C.DB)
+}
+
 // DBMustConnect returns a connection to the database.
 // On any error, it prints error and exits the program
 func DBMustConnect() *sqlx.DB {
-	db, err := sqlx.Connect("postgres", C.DB)
+	db, err := DBConnect()
 	if err != nil {
 		fmt.Println("Cannot connect to database:", err)
 		os.Exit(1)

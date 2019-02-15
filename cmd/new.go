@@ -21,7 +21,7 @@ var schema = []string{
 		email TEXT DEFAULT '',
 		club_name TEXT DEFAULT '',
 		club_abbrev TEXT DEFAULT '',
-		seed TEXT DEFAULT '0:00',
+		seed BIGINT DEFAULT 0,
 		age INTEGER DEFAULT 0,
 		boat_name TEXT DEFAULT ' ',
 		country TEXT DEFAULT 'USA', 
@@ -37,14 +37,14 @@ var schema = []string{
 	`CREATE TABLE Results (
 		id SERIAL PRIMARY KEY,
 		place INTEGER DEFAULT 0,
-		time INTEGER DEFAULT 0,
-		avg_pace INTEGER DEFAULT 0,
+		time BIGINT DEFAULT 0,
+		avg_pace BIGINT DEFAULT 0,
 		distance INTEGER DEFAULT 0,
 		name text DEFAULT ''::text,
 		bib_num INTEGER UNIQUE,
 		class VARCHAR(20) DEFAULT ''::text
 	);`,
-	"CREATE INDEX ON Results (entry_id);",
+	"CREATE INDEX ON Results (bib_num);",
 	`CREATE TABLE Events (
 		id SERIAL PRIMARY KEY,
 		name TEXT DEFAULT ''::text,

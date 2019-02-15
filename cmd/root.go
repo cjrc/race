@@ -6,7 +6,6 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/jmoiron/sqlx"
 	"github.com/spf13/cobra"
@@ -88,15 +87,10 @@ func initConfig() {
 		viper.SetConfigName("race")
 	}
 
-	viper.AutomaticEnv() // read in environment variables that match
-	viper.BindEnv("DB")  // need the db before init has been run and config file generated
-	viper.SetDefault("DB", "")
-	viper.SetDefault("HTMLPath", "shared/html")
-	viper.SetDefault("RacePath", "shared/races")
-	viper.SetDefault("ResultsPath", "shared/results")
-	viper.SetDefault("TemplatePath", "templates")
-	viper.SetEnvPrefix("RACE")
-	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	// bind default values to config params
+	for k, v := range ConfigDefaults {
+		viper.SetDefault(k, v)
+	}
 
 	// If a config file is found, read it in.
 	if err := viper.ReadInConfig(); err == nil {

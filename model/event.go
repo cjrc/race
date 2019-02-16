@@ -1,5 +1,9 @@
 package model
 
+import (
+	"github.com/jmoiron/sqlx"
+)
+
 // Event represents an entire event, ie "Masters Men Age 30-39"
 type Event struct {
 	ID       int
@@ -7,6 +11,10 @@ type Event struct {
 	Name     string
 	Distance int
 	Bank     string
-	Entries  []Entry `yaml:"entries,omitempty"`
-	Races    []Race  `yaml:"races,omitempty"`
+}
+
+// Entries returns all entries for the specified event
+func (event Event) Entries(db *sqlx.DB) (entries []Entry, err error) {
+	err = db.Select(&entries, "SELECT * FROM entries WHERE event_id=$1", event.ID)
+	return
 }

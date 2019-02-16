@@ -7,9 +7,9 @@ import (
 	"io"
 	"os"
 
-	"gopkg.in/yaml.v2"
-
+	"github.com/cjrc/race/model"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v2"
 )
 
 // Config represents the global configuration
@@ -28,6 +28,8 @@ type Config struct {
 	}
 
 	MaxEntries int // Maximum number of lines that will be read from entries.xls
+
+	Events []model.Event // The events in this regatta
 }
 
 // ConfigDefaults are passed to Viper to set the default config values
@@ -47,6 +49,10 @@ var ConfigDefaults = map[string]interface{}{
 	"EntryCols.BoatName":   14,
 	"EntryCols.Country":    24,
 	"MaxEntries":           2000,
+	"Events": []model.Event{
+		model.Event{ID: 1, Start: "8:00AM", Name: "Open Men", Distance: 2000, Bank: "A"},
+		model.Event{ID: 2, Start: "8:15AM", Name: "Open Women", Distance: 2000, Bank: "B"},
+	},
 }
 
 // C contains global configuration

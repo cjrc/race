@@ -13,20 +13,20 @@ import (
 
 // Entry represents one boat in the regatta
 type Entry struct {
-	ID         int
-	Email      string
-	ClubName   string
-	ClubAbbrev string
-	Seed       time.Duration
-	Age        int
-	Name       string
-	Country    string
-	EventID    int
-	RaceID     int
-	Lane       int
-	Scratched  bool
-	Ltwt       bool
-	BibNum     int
+	ID         int           `db:"id"`
+	Email      string        `db:"email"`
+	ClubName   string        `db:"club_name"`
+	ClubAbbrev string        `db:"club_abbrev"`
+	Seed       time.Duration `db:"seed"`
+	Age        int           `db:"age"`
+	BoatName   string        `db:"boat_name"`
+	Country    string        `db:"country"`
+	EventID    int           `db:"event_id"`
+	RaceID     int           `db:"race_id"`
+	Lane       int           `db:"lane"`
+	Scratched  bool          `db:"scratched"`
+	Ltwt       bool          `db:"ltwt"`
+	BibNum     int           `db:"bib_num"`
 }
 
 // EntriesFilename is the location of the excel workbook containing entries.
@@ -45,7 +45,43 @@ downloaded from RegattaCentral as "Generic Boats".`,
 	},
 }
 
+func addEntriesToDatabase(entries []Entry) error {
+	sql := `INSERT INTO Entries(email, club_name, club_abbrev, seed, age, boat_name, 
+								country, event_id, bib_num)
+			VALUES(:email, :club_name, :club_abbrev, :seed, :age, :boat_name,
+				   :country, :event_id, :bib_num)
+			ON CONFLICT (bib_num)
+			DO NOTHING;`
+
+	db := DBMustConnect()
+
+	for _, entry := range entries {
+		// ignore empty results
+		if entry.BibNum == 0 {
+			continue
+		}
+		fmt.Printf("Adding Entry for %s (bib # %d)..", entry.BoatName, entry.BibNum)
+		res, err := db.NamedExec(sql, &entry)
+		if err != nil {
+			return err
+		}
+		num, _ := res.RowsAffected()
+		if num == 0 {
+			fmt.Println(" duplicate entry, ignored.")
+		} else if num == 1 {
+			fmt.Println(" done.")
+		} else {
+			fmt.Println(" something stranged happened!")
+		}
+	}
+
+	return nil
+
+}
+
 func importRows(rows [][]string) error {
+	var entries []Entry
+
 	// ignore the header row
 	for rowid, row := range rows[1:] {
 		ErrorRow := rowid + 2 // for error reporting, the row # as soon in Excel
@@ -82,15 +118,14 @@ func importRows(rows [][]string) error {
 			ClubAbbrev: row[C.EntryCols.ClubAbbrev],
 			Seed:       seed,
 			Age:        age,
-			Name:       row[C.EntryCols.BoatName],
+			BoatName:   row[C.EntryCols.BoatName],
 			Country:    row[C.EntryCols.Country],
 			BibNum:     boatID,
 		}
 
-		fmt.Println("Importing ", entry.Name)
-		// TODO create in the db
+		entries = append(entries, entry)
 	}
-	return nil
+	return addEntriesToDatabase(entries)
 }
 
 func importEntries() {
@@ -113,5 +148,5 @@ func importEntries() {
 func init() {
 	importCmd.AddCommand(entriesCmd)
 
-	importCmd.PersistentFlags().StringVar(&EntriesFilename, "file", EntriesFilename, "Specify Excel workbook with entries from Regatta Central")
+	importCmd.PersistentFlags().StringVar(&EntriesFilename, "file", EntriesFilename, "Path to Excel file from Regatta Central")
 }

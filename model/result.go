@@ -21,6 +21,9 @@ type Result struct {
 	Name     string        `db:"name"`
 	BibNum   int           `db:"bib_num"`
 	Class    string        `db:"class"`
+
+	// Not used by the Venue racing app
+	Official bool `db:"official"`
 }
 
 //ReadResults reads the race results from the specified io.Reader and appends them to the

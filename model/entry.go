@@ -3,7 +3,6 @@ package model
 import (
 	"time"
 
-	"github.com/cjrc/erg"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -23,7 +22,7 @@ type Entry struct {
 	Scratched  bool          `db:"scratched"`
 	Ltwt       bool          `db:"ltwt"`
 	BibNum     int           `db:"bib_num"`
-	Results    erg.Result    `db:"result"`
+	Result     Result        `db:"result"`
 }
 
 // Insert will insert the entry into the specfied database

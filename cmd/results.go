@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/cjrc/erg"
+	"github.com/cjrc/race/model"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/cobra"
 )
@@ -37,7 +37,7 @@ to quickly create a Cobra application.`,
 	},
 }
 
-func addResultsToDatabase(results []erg.Result) error {
+func addResultsToDatabase(results []model.Result) error {
 	db := DBMustConnect()
 
 	for _, result := range results {
@@ -69,7 +69,7 @@ func importResults() error {
 
 	for _, filename := range filenames {
 		fmt.Println("Reading results from", filename)
-		results, err := erg.ReadResultsFromFile(filename)
+		results, err := model.ReadResultsFromFile(filename)
 		if err != nil {
 			return err
 		}
@@ -88,7 +88,7 @@ func watchResults(watcher *fsnotify.Watcher) {
 		case event := <-watcher.Events:
 			if event.Op&fsnotify.Write == fsnotify.Write {
 				fmt.Println("Reading results from", event.Name)
-				results, err := erg.ReadResultsFromFile(event.Name)
+				results, err := model.ReadResultsFromFile(event.Name)
 				if err != nil {
 					fmt.Println("Error reading results:", err)
 					doneCh <- true

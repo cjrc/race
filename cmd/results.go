@@ -51,11 +51,11 @@ func addResultsToDatabase(results []erg.Result) error {
 			continue
 		}
 		fmt.Printf("Adding results for %s (bib # %d)..", result.Name, result.BibNum)
-		result, err := db.NamedExec(sql, &result)
+		res, err := db.NamedExec(sql, &result)
 		if err != nil {
 			return err
 		}
-		num, _ := result.RowsAffected()
+		num, _ := res.RowsAffected()
 		if num == 0 {
 			fmt.Println(" duplicate results, ignored.")
 		} else if num == 1 {

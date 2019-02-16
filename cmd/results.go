@@ -38,11 +38,6 @@ to quickly create a Cobra application.`,
 }
 
 func addResultsToDatabase(results []erg.Result) error {
-	sql := `INSERT INTO Results(place, time, avg_pace, distance, name, bib_num, class) 
-			VALUES(:place, :time, :avg_pace, :distance, :name, :bib_num, :class)
-			ON CONFLICT (bib_num)
-			DO NOTHING;`
-
 	db := DBMustConnect()
 
 	for _, result := range results {
@@ -51,17 +46,14 @@ func addResultsToDatabase(results []erg.Result) error {
 			continue
 		}
 		fmt.Printf("Adding results for %s (bib # %d)..", result.Name, result.BibNum)
-		res, err := db.NamedExec(sql, &result)
+		ok, err := result.Insert(db)
 		if err != nil {
 			return err
 		}
-		num, _ := res.RowsAffected()
-		if num == 0 {
+		if !ok {
 			fmt.Println(" duplicate results, ignored.")
-		} else if num == 1 {
-			fmt.Println(" done.")
 		} else {
-			fmt.Println(" something stranged happened!")
+			fmt.Println(" done.")
 		}
 	}
 

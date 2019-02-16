@@ -6,6 +6,29 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// EntrySchema is the sql commands to create the Entries table
+var EntrySchema = []string{
+	`CREATE TABLE Entries (
+			id SERIAL PRIMARY KEY,
+			email TEXT DEFAULT '',
+			club_name TEXT DEFAULT '',
+			club_abbrev TEXT DEFAULT '',
+			seed BIGINT DEFAULT 0,
+			age INTEGER DEFAULT 0,
+			boat_name TEXT DEFAULT ' ',
+			country TEXT DEFAULT 'USA', 
+			event_id INTEGER DEFAULT 0,
+			race_id INTEGER DEFAULT 0,
+			lane INTEGER DEFAULT 0,
+			scratched BOOLEAN DEFAULT false,
+			ltwt BOOLEAN DEFAULT false,
+			bib_num INTEGER UNIQUE
+		);`,
+	"CREATE INDEX ON Entries (race_id);",
+	"CREATE INDEX ON Entries (event_id);",
+	"CREATE INDEX ON Entries (bib_num);",
+}
+
 // Entry represents one boat in the regatta
 type Entry struct {
 	ID         int           `db:"id"`

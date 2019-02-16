@@ -10,60 +10,10 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/cjrc/race/model"
 	_ "github.com/lib/pq" // database driver for Postgres
 	"github.com/spf13/cobra"
 )
-
-// SQLcommands are for creating the data tables, indices, etc
-var schema = []string{
-	`CREATE TABLE Entries (
-		id SERIAL PRIMARY KEY,
-		email TEXT DEFAULT '',
-		club_name TEXT DEFAULT '',
-		club_abbrev TEXT DEFAULT '',
-		seed BIGINT DEFAULT 0,
-		age INTEGER DEFAULT 0,
-		boat_name TEXT DEFAULT ' ',
-		country TEXT DEFAULT 'USA', 
-		event_id INTEGER DEFAULT 0,
-		race_id INTEGER DEFAULT 0,
-		lane INTEGER DEFAULT 0,
-		scratched BOOLEAN DEFAULT false,
-		ltwt BOOLEAN DEFAULT false,
-		bib_num INTEGER UNIQUE
-	);`,
-	"CREATE INDEX ON Entries (race_id);",
-	"CREATE INDEX ON Entries (event_id);",
-	`CREATE TABLE Results (
-		id SERIAL PRIMARY KEY,
-		place INTEGER DEFAULT 0,
-		time BIGINT DEFAULT 0,
-		avg_pace BIGINT DEFAULT 0,
-		distance INTEGER DEFAULT 0,
-		name text DEFAULT ''::text,
-		bib_num INTEGER UNIQUE,
-		class VARCHAR(20) DEFAULT ''::text
-	);`,
-	"CREATE INDEX ON Results (bib_num);",
-	`CREATE TABLE Events (
-		id SERIAL PRIMARY KEY,
-		name TEXT DEFAULT ''::text,
-		start TEXT DEFAULT '8:00AM'::text,
-		distance INTEGER DEFAULT 2000,
-		official bool DEFAULT false
-	);`,
-	`CREATE TABLE Races (
-		id SERIAL PRIMARY KEY,
-		boat_type INTEGER DEFAULT 0,
-		name TEXT DEFAULT ''::text,
-		distance INTEGER DEFAULT 2000,
-		enable_stroke_data BOOLEAN DEFAULT false,
-		split_distance INTEGER DEFAULT 500,
-		split_times INTEGER DEFAULT 120,
-		nlanes INTEGER DEFAULT 10,
-		duration_type INTEGER DEFAULT 0
-	);`,
-}
 
 var resultsTemplate = `
 <html>
@@ -320,6 +270,12 @@ func isDirEmpty(name string) (bool, error) {
 }
 
 func createDatabase() error {
+	var schema []string
+
+	schema = append(schema, model.EntrySchema...)
+	schema = append(schema, model.ResultSchema...)
+	schema = append(schema, model.RaceSchema...)
+
 	db := DBMustConnect()
 
 	for _, s := range schema {

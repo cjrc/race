@@ -20,6 +20,21 @@ const (
 	EIGHTS  = 3
 )
 
+// RaceSchema is the sql commands to create the Races table
+var RaceSchema = []string{
+	`CREATE TABLE Races (
+		id SERIAL PRIMARY KEY,
+		boat_type INTEGER DEFAULT 0,
+		name TEXT DEFAULT ''::text,
+		distance INTEGER DEFAULT 2000,
+		enable_stroke_data BOOLEAN DEFAULT false,
+		split_distance INTEGER DEFAULT 500,
+		split_times INTEGER DEFAULT 120,
+		nlanes INTEGER DEFAULT 10,
+		duration_type INTEGER DEFAULT 0
+	);`,
+}
+
 // Race is a flight of boats racing together, they are written to a Concept-2 .RAC file
 // and imported into the Venue Racing software
 type Race struct {

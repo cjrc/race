@@ -12,6 +12,22 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// ResultSchema is the sql commands to create the Results table
+var ResultSchema = []string{
+	`CREATE TABLE Results (
+		id SERIAL PRIMARY KEY,
+		place INTEGER DEFAULT 0,
+		time BIGINT DEFAULT 0,
+		avg_pace BIGINT DEFAULT 0,
+		distance INTEGER DEFAULT 0,
+		name text DEFAULT ''::text,
+		bib_num INTEGER UNIQUE,
+		class VARCHAR(20) DEFAULT ''::text,
+		official BOOLEAN DEFAULT false,
+	);`,
+	"CREATE INDEX ON Results (bib_num);",
+}
+
 // Result represents the race result of one erg from the Venue Racing results file
 type Result struct {
 	Place    int           `db:"place"`

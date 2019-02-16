@@ -15,6 +15,22 @@ type Event struct {
 
 // Entries returns all entries for the specified event
 func (event Event) Entries(db *sqlx.DB) (entries []Entry, err error) {
-	err = db.Select(&entries, "SELECT * FROM entries WHERE event_id=$1", event.ID)
+	sql := `
+SELECT 
+	entries.*,
+	results.place "result.place",
+	results.time "result.time",
+	results.avg_pace "result.avg_pace",
+	results.distance "result.distance",
+	results.name "result.name",
+	results.bib_num "result.bib_num",
+	results.class "result.class",
+	results.official "result.official"
+FROM
+	entries JOIN results ON entries.bib_num = results.bib_num
+WHERE
+	event_id=$1`
+
+	err = db.Select(&entries, sql, event.ID)
 	return
 }

@@ -7,27 +7,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cjrc/race/model"
 	"github.com/extrame/xls"
 	"github.com/spf13/cobra"
 )
-
-// Entry represents one boat in the regatta
-type Entry struct {
-	ID         int           `db:"id"`
-	Email      string        `db:"email"`
-	ClubName   string        `db:"club_name"`
-	ClubAbbrev string        `db:"club_abbrev"`
-	Seed       time.Duration `db:"seed"`
-	Age        int           `db:"age"`
-	BoatName   string        `db:"boat_name"`
-	Country    string        `db:"country"`
-	EventID    int           `db:"event_id"`
-	RaceID     int           `db:"race_id"`
-	Lane       int           `db:"lane"`
-	Scratched  bool          `db:"scratched"`
-	Ltwt       bool          `db:"ltwt"`
-	BibNum     int           `db:"bib_num"`
-}
 
 // EntriesFilename is the location of the excel workbook containing entries.
 // Defaults to "boats.xls"
@@ -45,14 +28,7 @@ downloaded from RegattaCentral as "Generic Boats".`,
 	},
 }
 
-func addEntriesToDatabase(entries []Entry) error {
-	sql := `INSERT INTO Entries(email, club_name, club_abbrev, seed, age, boat_name, 
-								country, event_id, bib_num)
-			VALUES(:email, :club_name, :club_abbrev, :seed, :age, :boat_name,
-				   :country, :event_id, :bib_num)
-			ON CONFLICT (bib_num)
-			DO NOTHING;`
-
+func addEntriesToDatabase(entries []model.Entry) error {
 	db := DBMustConnect()
 
 	for _, entry := range entries {
@@ -61,17 +37,15 @@ func addEntriesToDatabase(entries []Entry) error {
 			continue
 		}
 		fmt.Printf("Adding Entry for %s (bib # %d)..", entry.BoatName, entry.BibNum)
-		res, err := db.NamedExec(sql, &entry)
+		ok, err := entry.Insert(db)
 		if err != nil {
 			return err
 		}
-		num, _ := res.RowsAffected()
-		if num == 0 {
+
+		if !ok {
 			fmt.Println(" duplicate entry, ignored.")
-		} else if num == 1 {
-			fmt.Println(" done.")
 		} else {
-			fmt.Println(" something stranged happened!")
+			fmt.Println(" done.")
 		}
 	}
 
@@ -80,7 +54,7 @@ func addEntriesToDatabase(entries []Entry) error {
 }
 
 func importRows(rows [][]string) error {
-	var entries []Entry
+	var entries []model.Entry
 
 	// ignore the header row
 	for rowid, row := range rows[1:] {
@@ -111,7 +85,7 @@ func importRows(rows [][]string) error {
 			return fmt.Errorf("Row %d, invalid seed time: %v", ErrorRow, row[C.EntryCols.Seed])
 		}
 
-		entry := Entry{
+		entry := model.Entry{
 			EventID:    eventID,
 			Email:      row[C.EntryCols.Email],
 			ClubName:   row[C.EntryCols.ClubName],

@@ -27,15 +27,15 @@ var EntrySchema = []string{
 	"CREATE INDEX ON Entries (race_id);",
 	"CREATE INDEX ON Entries (event_id);",
 	"CREATE INDEX ON Entries (bib_num);",
-	`CREATE OR REPLACE FUNCTION notify_entries() RETURNS TRIGGER AS $$
-	 BEGIN
-	   NOTIFY entries;
-	   RETURN null;
-	 END;
-	 $$ language plpgsql;`,
-	`CREATE TRIGGER notify_entries_event
-	 AFTER INSERT OR UPDATE OR DELETE ON entries
-	 FOR EACH STATEMENT EXECUTE PROCEDURE notify_entries();`,
+	// `CREATE OR REPLACE FUNCTION notify_entries() RETURNS TRIGGER AS $$
+	//  BEGIN
+	//    NOTIFY entries;
+	//    RETURN null;
+	//  END;
+	//  $$ language plpgsql;`,
+	// `CREATE TRIGGER notify_entries_event
+	//  AFTER INSERT OR UPDATE OR DELETE ON entries
+	//  FOR EACH STATEMENT EXECUTE PROCEDURE notify_entries();`,
 }
 
 // Entry represents one boat in the regatta

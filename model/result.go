@@ -25,16 +25,16 @@ var ResultSchema = []string{
 		class VARCHAR(20) DEFAULT ''::text,
 		official BOOLEAN DEFAULT false,
 	);`,
-	"CREATE INDEX ON Results (bib_num);",
-	`CREATE OR REPLACE FUNCTION notify_results() RETURNS TRIGGER AS $$
-	 BEGIN
-	   NOTIFY results;
-	   RETURN null;
-	 END;
-	 $$ language plpgsql;`,
-	`CREATE TRIGGER notify_results_event
-	 AFTER INSERT OR UPDATE OR DELETE ON results
-	 FOR EACH STATEMENT EXECUTE PROCEDURE notify_results();`,
+	// "CREATE INDEX ON Results (bib_num);",
+	// `CREATE OR REPLACE FUNCTION notify_results() RETURNS TRIGGER AS $$
+	//  BEGIN
+	//    NOTIFY results;
+	//    RETURN null;
+	//  END;
+	//  $$ language plpgsql;`,
+	// `CREATE TRIGGER notify_results_event
+	//  AFTER INSERT OR UPDATE OR DELETE ON results
+	//  FOR EACH STATEMENT EXECUTE PROCEDURE notify_results();`,
 }
 
 // Result represents the race result of one erg from the Venue Racing results file
@@ -163,4 +163,10 @@ func (result Result) Insert(db *sqlx.DB) (bool, error) {
 	num, _ := res.RowsAffected()
 
 	return (num == 1), nil
+}
+
+// NotifyResults will send the 'results' notification to the DB
+func NotifyResults(db *sqlx.DB) error {
+	_, err := db.Exec("NOTIFY results;")
+	return err
 }

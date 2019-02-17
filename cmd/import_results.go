@@ -57,8 +57,8 @@ func addResultsToDatabase(results []model.Result) error {
 		}
 	}
 
-	return nil
-
+	// Notify listeners that new results have been added
+	return model.NotifyResults(db)
 }
 
 func importResults() error {

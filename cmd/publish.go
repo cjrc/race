@@ -238,10 +238,17 @@ func PublishLiveResults() error {
 	}
 
 	listener := pq.NewListener(C.DB, 10*time.Second, time.Minute, reportProblem)
+	defer listener.Close()
+
+	// listen for changes to results
 	if err := listener.Listen("results"); err != nil {
 		return err
 	}
-	defer listener.Close()
+
+	// listen for changes to entries
+	if err := listener.Listen("entries"); err != nil {
+		return err
+	}
 
 	fmt.Println("Listening for live results...")
 	return waitForResults(listener)

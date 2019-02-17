@@ -125,6 +125,8 @@ func PublishResults() error {
 		sort.Slice(events[i].Entries, func(h, k int) bool {
 			if events[i].Entries[h].Result.Time == 0 {
 				return false
+			} else if events[i].Entries[k].Result.Time == 0 {
+				return true
 			}
 			return events[i].Entries[h].Result.Time < events[i].Entries[k].Result.Time
 		})

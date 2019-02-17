@@ -13,8 +13,11 @@ import (
 	"time"
 
 	"github.com/cjrc/race/model"
+	"github.com/lib/pq"
 	"github.com/spf13/cobra"
 )
+
+var liveResults bool
 
 // publishCmd represents the publish command
 var publishCmd = &cobra.Command{
@@ -39,7 +42,13 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := PublishResults(); err != nil {
+		var err error
+		if publishLive {
+			err = PublishLiveResults()
+		} else {
+			err = PublishResults()
+		}
+		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
@@ -91,6 +100,7 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// publishCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	publishResultsCmd.Flags().BoolVar(&publishLive, "live", false, "Publish live results in realtime.")
 }
 
 func durString(d time.Duration) string {
@@ -107,7 +117,8 @@ func durString(d time.Duration) string {
 func PublishResults() error {
 
 	// Events sorted by their event number
-	var events = C.Events
+	var events = append([]model.Event(nil), C.Events...)
+
 	sort.Slice(events, func(h, k int) bool {
 		return events[h].ID < events[k].ID
 	})
@@ -204,5 +215,44 @@ func PublishResults() error {
 	err = t.Execute(file, data)
 
 	return err
+
+}
+
+func waitForResults(l *pq.Listener) error {
+	for {
+		select {
+		case <-l.Notify:
+			if err := PublishResults(); err != nil {
+				return err
+			}
+		case <-time.After(5 * time.Minute):
+			fmt.Println("Received no results for 5 minutes, checking connection")
+			if err := l.Ping(); err != nil {
+				return err
+			}
+		}
+	}
+}
+
+// PublishLiveResults will publish HTML results as they arrive at the database
+func PublishLiveResults() error {
+	// publish existing results
+	if err := PublishResults(); err != nil {
+		return err
+	}
+
+	reportProblem := func(ev pq.ListenerEventType, err error) {
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+	}
+
+	listener := pq.NewListener(C.DB, 10*time.Second, time.Minute, reportProblem)
+	if err := listener.Listen("results"); err != nil {
+		return err
+	}
+
+	fmt.Println("Listening for live results...")
+	return waitForResults(listener)
 
 }

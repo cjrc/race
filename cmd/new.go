@@ -54,7 +54,7 @@ var resultsTemplate = `
                 </div>
                 {{ range $place,$entry := .Entries }}
                     <div class="w3-row" id="{{$entry.ID}}">
-                        <div class="w3-col  w3-center s2">{{ $entry.Result.Place }}</div>
+                        <div class="w3-col  w3-center s2">{{ place $entry }}</div>
                         <div class="w3-col w3-center s2"> {{ $entry.ClubAbbrev }} </div>
                         <div class="w3-col  s6"> {{ $entry.BoatName }} {{ltwt $entry}}</div>
                         <div class="w3-col  s2 w3-center">{{ time $entry }}</div>    

@@ -23,24 +23,14 @@ var publishLive bool
 var publishCmd = &cobra.Command{
 	Use:   "publish",
 	Short: "Publish shared resources (results, race files, schedule)",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Long:  ``,
 }
 
 // publishCmd represents the publish command
 var publishResultsCmd = &cobra.Command{
 	Use:   "results",
-	Short: "Publish regatta schedule as an HTML file",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "Publish regatta results as an HTML file",
+	Long:  `Publishing process uses the results.html template to format results.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var err error
 		if publishLive {

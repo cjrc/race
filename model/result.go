@@ -26,6 +26,15 @@ var ResultSchema = []string{
 		official BOOLEAN DEFAULT false,
 	);`,
 	"CREATE INDEX ON Results (bib_num);",
+	`CREATE OR REPLACE FUNCTION notify_results() RETURNS TRIGGER AS $$
+	 BEGIN
+	   NOTIFY results;
+	   RETURN null;
+	 END;
+	 $$ language plpgsql;`,
+	`CREATE TRIGGER notify_results_event
+	 AFTER INSERT OR UPDATE OR DELETE ON results
+	 FOR EACH ROW EXECUTE PROCEDURE notify_results();`,
 }
 
 // Result represents the race result of one erg from the Venue Racing results file

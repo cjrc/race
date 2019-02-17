@@ -241,6 +241,7 @@ func PublishLiveResults() error {
 	if err := listener.Listen("results"); err != nil {
 		return err
 	}
+	defer listener.Close()
 
 	fmt.Println("Listening for live results...")
 	return waitForResults(listener)

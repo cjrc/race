@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var liveResults bool
+var publishLive bool
 
 // publishCmd represents the publish command
 var publishCmd = &cobra.Command{

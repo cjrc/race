@@ -32,6 +32,7 @@ FROM
 WHERE
 	event_id=$1`
 
+	event.Entries = nil // so entries cannot be double loaded
 	err = db.Select(&event.Entries, sql, event.ID)
 	return
 }

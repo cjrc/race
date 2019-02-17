@@ -9,6 +9,7 @@ import (
 	"os"
 	"path"
 	"sort"
+	"strconv"
 	"time"
 
 	"github.com/cjrc/race/model"
@@ -113,13 +114,18 @@ func PublishResults() error {
 
 	db := DBMustConnect()
 
-	// Sort finishing times
 	for i := range events {
+		// Load the entries for this event
 		if err := events[i].LoadEntriesWithResults(db); err != nil {
 			return err
 		}
 
+		// Sort finishing times
+		// A finishing time of 0 means they didn't start
 		sort.Slice(events[i].Entries, func(h, k int) bool {
+			if events[i].Entries[h].Result.Time == 0 {
+				return false
+			}
 			return events[i].Entries[h].Result.Time < events[i].Entries[k].Result.Time
 		})
 
@@ -158,8 +164,11 @@ func PublishResults() error {
 			// }
 			return template.HTML("<i>Unofficial</i>")
 		},
-		"place": func(e model.Entry) int {
-			return e.Result.Place
+		"place": func(e model.Entry) string {
+			if e.Result.Time == 0 {
+				return "-"
+			}
+			return strconv.Itoa(e.Result.Place)
 		},
 		"now": func() string {
 			return time.Now().Format("Jan 2, 2006 at 03:04PM")
@@ -171,6 +180,9 @@ func PublishResults() error {
 			return ""
 		},
 		"time": func(entry model.Entry) string {
+			if entry.Result.Time == 0 {
+				return "-"
+			}
 			return durString(entry.Result.Time)
 		},
 	}

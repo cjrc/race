@@ -131,10 +131,12 @@ func PublishResults() error {
 			return events[i].Entries[h].Result.Time < events[i].Entries[k].Result.Time
 		})
 
+		// Give each result a finish place
 		place := 1
 		for j := range events[i].Entries {
 			if j == 0 {
 				events[i].Entries[j].Result.Place = place
+				// deal with ties appropriately
 			} else if events[i].Entries[j].Result.Time == events[i].Entries[j-1].Result.Time {
 				events[i].Entries[j].Result.Place = events[i].Entries[j-1].Result.Place
 			} else {
@@ -144,7 +146,9 @@ func PublishResults() error {
 		}
 	}
 
+	// create the HTML results file
 	fullname := path.Join(C.HTMLPath, "results.html")
+	fmt.Println("Publishing results to", fullname)
 
 	file, err := os.Create(fullname)
 	if err != nil {

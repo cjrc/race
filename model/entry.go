@@ -35,7 +35,7 @@ var EntrySchema = []string{
 	 $$ language plpgsql;`,
 	`CREATE TRIGGER notify_entries_event
 	 AFTER INSERT OR UPDATE OR DELETE ON entries
-	 FOR EACH ROW EXECUTE PROCEDURE notify_entries();`,
+	 FOR EACH STATEMENT EXECUTE PROCEDURE notify_entries();`,
 }
 
 // Entry represents one boat in the regatta

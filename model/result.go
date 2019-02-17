@@ -34,7 +34,7 @@ var ResultSchema = []string{
 	 $$ language plpgsql;`,
 	`CREATE TRIGGER notify_results_event
 	 AFTER INSERT OR UPDATE OR DELETE ON results
-	 FOR EACH ROW EXECUTE PROCEDURE notify_results();`,
+	 FOR EACH STATEMENT EXECUTE PROCEDURE notify_results();`,
 }
 
 // Result represents the race result of one erg from the Venue Racing results file

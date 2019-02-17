@@ -209,12 +209,19 @@ func PublishResults() error {
 }
 
 func waitForResults(l *pq.Listener) error {
+	var lastUpdate time.Time
 	for {
 		select {
 		case <-l.Notify:
-			if err := PublishResults(); err != nil {
-				return err
+			// Don't update results or schedule more often than every 10 seconds
+			now := time.Now()
+			if now.Sub(lastUpdate) > 10*time.Second {
+				if err := PublishResults(); err != nil {
+					return err
+				}
+				lastUpdate = now
 			}
+
 		case <-time.After(5 * time.Minute):
 			fmt.Println("Received no results for 5 minutes, checking connection")
 			if err := l.Ping(); err != nil {

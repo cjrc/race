@@ -11,10 +11,11 @@ type Event struct {
 	Name     string
 	Distance int
 	Bank     string
+	Entries  []Entry
 }
 
-// Entries returns all entries for the specified event
-func (event Event) Entries(db *sqlx.DB) (entries []Entry, err error) {
+// LoadEntriesWithResults populates the Entries field for the specified event
+func (event *Event) LoadEntriesWithResults(db *sqlx.DB) (err error) {
 	sql := `
 SELECT 
 	entries.*,
@@ -31,6 +32,6 @@ FROM
 WHERE
 	event_id=$1`
 
-	err = db.Select(&entries, sql, event.ID)
+	err = db.Select(&event.Entries, sql, event.ID)
 	return
 }

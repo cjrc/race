@@ -39,7 +39,7 @@ type Result struct {
 	Class    string        `db:"class"`
 
 	// Not used by the Venue racing app
-	Official bool `db:"official"`
+	Official *bool `db:"official"`
 }
 
 //ReadResults reads the race results from the specified io.Reader and appends them to the

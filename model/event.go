@@ -11,7 +11,7 @@ type Event struct {
 	Name     string
 	Distance int
 	Bank     string
-	Entries  []Entry
+	Entries  []Entry `yaml:"entries,omitempty"`
 }
 
 // LoadEntriesWithResults populates the Entries field for the specified event

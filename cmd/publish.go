@@ -81,15 +81,6 @@ func init() {
 	publishCmd.AddCommand(publishRacesCmd)
 	publishCmd.AddCommand(publishScheduleCmd)
 
-	// Here you will define your flags and configuration settings.
-
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// publishCmd.PersistentFlags().String("foo", "", "A help for foo")
-
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// publishCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	publishResultsCmd.Flags().BoolVar(&publishLive, "live", false, "Publish live results in realtime.")
 }
 
@@ -188,16 +179,18 @@ func PublishResults() error {
 
 func waitForResults(l *pq.Listener) error {
 	for {
+		fmt.Println("Listening for live results...")
 		select {
 		case <-l.Notify:
 			if err := PublishResults(); err != nil {
 				return err
 			}
 		case <-time.After(5 * time.Minute):
-			fmt.Println("Received no results for 5 minutes, checking connection")
+			fmt.Print("Received no results for 5 minutes, checking connection... ")
 			if err := l.Ping(); err != nil {
 				return err
 			}
+			fmt.Println("connection good!")
 		}
 	}
 }
@@ -218,17 +211,13 @@ func PublishLiveResults() error {
 	listener := pq.NewListener(C.DB, 10*time.Second, time.Minute, reportProblem)
 	defer listener.Close()
 
-	// listen for changes to results
+	// listen for changes to results and entries
 	if err := listener.Listen("results"); err != nil {
 		return err
 	}
-
-	// listen for changes to entries
 	if err := listener.Listen("entries"); err != nil {
 		return err
 	}
 
-	fmt.Println("Listening for live results...")
 	return waitForResults(listener)
-
 }

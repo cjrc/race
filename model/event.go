@@ -36,3 +36,4 @@ WHERE
 	err = db.Select(&event.Entries, sql, event.ID)
 	return
 }
+

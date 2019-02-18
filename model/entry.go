@@ -1,6 +1,7 @@
 package model
 
 import (
+	"sort"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -75,4 +76,39 @@ func (entry Entry) Insert(db *sqlx.DB) (bool, error) {
 	num, _ := res.RowsAffected()
 
 	return (num == 1), nil
+}
+
+// SortEntriesByTime sorts the slice of entries, with the fastest finishing times coming first
+// A Finish time of 0 indicates that the entry did not race, and they will be sorted to the
+// end
+func SortEntriesByTime(entries []Entry) {
+	// Sort finishing times
+	// A finishing time of 0 means they didn't start
+	sort.Slice(entries, func(h, k int) bool {
+		if entries[h].Result.Time == 0 {
+			return false
+		} else if entries[k].Result.Time == 0 {
+			return true
+		}
+		return entries[h].Result.Time < entries[k].Result.Time
+	})
+}
+
+// AssignPlacesToEntries will sort the entries by their finishing times,
+// and assign places, taking ties into account
+func AssignPlacesToEntries(entries []Entry) {
+	SortEntriesByTime(entries)
+
+	place := 1
+	for j := range entries {
+		if j == 0 {
+			entries[j].Result.Place = place
+			// deal with ties appropriately
+		} else if entries[j].Result.Time == entries[j-1].Result.Time {
+			entries[j].Result.Place = entries[j-1].Result.Place
+		} else {
+			entries[j].Result.Place = place
+		}
+		place++
+	}
 }

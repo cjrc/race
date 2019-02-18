@@ -121,41 +121,19 @@ func PublishResults() error {
 			return err
 		}
 
-		// Sort finishing times
-		// A finishing time of 0 means they didn't start
-		sort.Slice(events[i].Entries, func(h, k int) bool {
-			if events[i].Entries[h].Result.Time == 0 {
-				return false
-			} else if events[i].Entries[k].Result.Time == 0 {
-				return true
-			}
-			return events[i].Entries[h].Result.Time < events[i].Entries[k].Result.Time
-		})
-
-		// Give each result a finish place
-		place := 1
-		for j := range events[i].Entries {
-			if j == 0 {
-				events[i].Entries[j].Result.Place = place
-				// deal with ties appropriately
-			} else if events[i].Entries[j].Result.Time == events[i].Entries[j-1].Result.Time {
-				events[i].Entries[j].Result.Place = events[i].Entries[j-1].Result.Place
-			} else {
-				events[i].Entries[j].Result.Place = place
-			}
-			place++
-		}
+		// Sort entries and give each result a finish place
+		model.AssignPlacesToEntries(events[i].Entries)
 	}
 
 	// create the HTML results file
 	fullname := path.Join(C.HTMLPath, "results.html")
-	fmt.Println("Publishing results to", fullname)
-
 	file, err := os.Create(fullname)
 	if err != nil {
 		return err
 	}
 	defer file.Close()
+
+	fmt.Println("Publishing results to", fullname)
 
 	funcMap := template.FuncMap{
 		"inc": func(i int) int {

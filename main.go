@@ -3,7 +3,9 @@
 
 package main
 
-import "github.com/cjrc/race/cmd"
+import (
+	"github.com/cjrc/race/cmd"
+)
 
 func main() {
 	cmd.Execute()

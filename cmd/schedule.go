@@ -33,6 +33,9 @@ func init() {
 	rootCmd.AddCommand(scheduleCmd)
 }
 
+// TODO: This is still the old scheduling system
+// Need to update to use the new database system, not GORM
+
 // ScheduleEvents schedules the specified events to run together at the same time, same bank
 func ScheduleEvents(db *gorm.DB, events []model.Event, bank string, start time.Time) {
 	var entries []model.Entry

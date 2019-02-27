@@ -9,8 +9,9 @@ type Event struct {
 	ID       int
 	Start    string
 	Name     string
-	Distance int
+	Distance uint
 	Bank     string
+	Group    int     // When scheduling races, events in the same group will be scheduled together
 	Entries  []Entry `yaml:"entries,omitempty"`
 }
 

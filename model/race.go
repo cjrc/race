@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
 )
 
 // FILESIG Signature used by Concept2 race files
@@ -31,7 +32,8 @@ var RaceSchema = []string{
 		split_distance INTEGER DEFAULT 500,
 		split_times INTEGER DEFAULT 120,
 		nlanes INTEGER DEFAULT 10,
-		duration_type INTEGER DEFAULT 0
+		duration_type INTEGER DEFAULT 0,
+		bank TEXT DEFAULT ''::text,
 	);`,
 }
 
@@ -47,6 +49,11 @@ type Race struct {
 	Boats            []Boat // len(boats) does not need to equal NLanes
 	NLanes           uint   // Number of lanes in this race
 	DurationType     uint   // 0=distance, 1=time?
+
+	// Not used by the Concept 2 racing
+	ID        int    `db:"id"`
+	Bank      string `db:"bank"`
+	StartTime time.Time
 }
 
 // Given a list of boats from a race, this will return the boat that is

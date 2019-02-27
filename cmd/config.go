@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
 
 	"github.com/cjrc/race/model"
 	"github.com/spf13/cobra"
@@ -26,6 +27,10 @@ type Config struct {
 	RacePath     string
 	ResultsPath  string
 	TemplatePath string
+
+	// For creating the schedule
+	RaceDuration time.Duration // How long each race will take in the schedule
+	SeedOrder    []int         // A list of lanes, races will be seeded in this order
 
 	EntryCols struct { // Column numbers for the RegattaCentral generic boats.xls file
 		EventID, BoatID, Age, Email, ClubName, ClubAbbrev, Seed, BoatName, Country int
@@ -53,6 +58,8 @@ var ConfigDefaults = map[string]interface{}{
 	"EntryCols.BoatName":   14,
 	"EntryCols.Country":    24,
 	"MaxEntries":           2000,
+	"SeedOrder":            []int{6, 7, 5, 8, 4, 9, 3, 10, 2, 11, 1, 12},
+	"RaceDuration":         15 * time.Minute,
 	"Events": []model.Event{
 		model.Event{ID: 1, Start: "8:00AM", Name: "Masters Men Age 30-39", Distance: 2000, Bank: "A", Entries: []model.Entry(nil)},
 		model.Event{ID: 2, Start: "8:15AM", Name: "Masters Women Age 30-39", Distance: 2000, Bank: "B", Entries: []model.Entry(nil)},

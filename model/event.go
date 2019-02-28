@@ -11,8 +11,11 @@ type Event struct {
 	Name     string
 	Distance uint
 	Bank     string
-	Group    int     // When scheduling races, events in the same group will be scheduled together
 	Entries  []Entry `yaml:"entries,omitempty"`
+
+	// When scheduling races, events in the same group will be scheduled together
+	// scheduling command sorts by group number
+	Group int
 }
 
 // LoadEntriesWithResults populates the Entries field for the specified event
